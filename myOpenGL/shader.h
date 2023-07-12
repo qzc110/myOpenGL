@@ -11,8 +11,6 @@
 class Shader
 {
 public:
-   uint32_t id;
-
    Shader(const char* vertex_path, const char* fragment_path)
    {
       std::string vertex_code;
@@ -33,7 +31,7 @@ public:
          vert_shader_file.close();
 
          frag_shader_file.open(fragment_path);
-         frag_shader_stream << vert_shader_file.rdbuf();
+         frag_shader_stream << frag_shader_file.rdbuf();
          frag_shader_file.close();
 
          vertex_code = vert_shader_stream.str();
@@ -41,71 +39,81 @@ public:
       }
       catch (std::ifstream::failure e)
       {
-         std::cout << "SHADER::FILE READ ERROR\n";
+         std::cout << "SHADER::File read error\n";
       }
       const char* vert_shader_code = vertex_code.c_str();
       const char* frag_shader_code = fragment_code.c_str();
 
 
       // compile shaders
-      int success;
-      char info_log[512];
-
       uint32_t vertex = glCreateShader(GL_VERTEX_SHADER);
       glShaderSource(vertex, 1, &vert_shader_code, NULL);
       glCompileShader(vertex);
-      glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-      checkCompileError(vertex, 0);
+      checkCompileError(vertex, Type::kVertex);
 
       uint32_t fragment = glCreateShader(GL_VERTEX_SHADER);
-      glShaderSource(vertex, 1, &vert_shader_code, NULL);
-      glCompileShader(vertex);
-      glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-      checkCompileError(fragment, 0);
+      glShaderSource(fragment, 1, &frag_shader_code, NULL);
+      glCompileShader(fragment);
+      checkCompileError(fragment, Type::kFragment);
 
-      id = glCreateProgram();
-      glAttachShader(id, vertex);
-      glAttachShader(id, fragment);
-      glLinkProgram(id);
-      glGetProgramiv(id, GL_LINK_STATUS, &success);
-      checkCompileError(id, 1);
+      id_ = glCreateProgram();
+      glAttachShader(id_, vertex);
+      glAttachShader(id_, fragment);
+      glLinkProgram(id_);
+      checkCompileError(id_, Type::kProgram);
+
+      glDeleteShader(vertex);
+      glDeleteShader(fragment);
    }
 
-   void use()
-   {
-      glUseProgram(id);
-   }
+   uint32_t getId() { return id_; }
+
+   void use() { glUseProgram(id_); }
 
    void setBool(const std::string& name, bool value) const
    {
-      glUniform1i(glGetUniformLocation(id, name.c_str()), static_cast<int>(value));
+      glUniform1i(glGetUniformLocation(id_, name.c_str()), static_cast<int>(value));
    }
    void setInt(const std::string& name, int value) const
    {
-      glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+      glUniform1i(glGetUniformLocation(id_, name.c_str()), value);
    }
    void setFloat(const std::string& name, float value) const
    {
-      glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+      glUniform1f(glGetUniformLocation(id_, name.c_str()), value);
    }
 
 private:
-   void checkCompileError(uint32_t shader, int type)
+   enum class Type { kVertex, kFragment, kProgram };
+   uint32_t id_;
+
+   void checkCompileError(uint32_t shader, Shader::Type type)
    {
       int success;
       char info_log[512];
+
       glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
       if (!success)
       {
-         if (type == 0)
+         switch (type)
          {
-            glGetShaderInfoLog(shader, 512, NULL, info_log);
-            std::cout << "SHADER::SHADER::COMPILATION FAILED\n" << info_log << std::endl;
-         }
-         else
-         {
-            glGetProgramInfoLog(shader, 512, NULL, info_log);
-            std::cout << "SHADER::PROGRAM::LINKING FAILED\n" << info_log << std::endl;
+            case Type::kVertex:
+               glGetShaderInfoLog(shader, 512, NULL, info_log);
+               std::cout << "SHADER::Vertex compilation failed\n" << info_log << std::endl;
+               break;
+
+            case Type::kFragment:
+               glGetShaderInfoLog(shader, 512, NULL, info_log);
+               std::cout << "SHADER::Fragment compilation failed\n" << info_log << std::endl;
+               break;
+
+            case Type::kProgram:
+               glGetProgramInfoLog(shader, 512, NULL, info_log);
+               std::cout << "SHADER::Program linking failed\n" << info_log << std::endl;
+               break;
+
+            default:
+               std::cout << "SHADER::Unknown shader compilation error\n";
          }
       }
    }
