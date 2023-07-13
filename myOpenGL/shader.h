@@ -51,7 +51,7 @@ public:
       glCompileShader(vertex);
       checkCompileError(vertex, Type::kVertex);
 
-      uint32_t fragment = glCreateShader(GL_VERTEX_SHADER);
+      uint32_t fragment = glCreateShader(GL_FRAGMENT_SHADER);
       glShaderSource(fragment, 1, &frag_shader_code, NULL);
       glCompileShader(fragment);
       checkCompileError(fragment, Type::kFragment);
@@ -87,34 +87,39 @@ private:
    enum class Type { kVertex, kFragment, kProgram };
    uint32_t id_;
 
-   void checkCompileError(uint32_t shader, Shader::Type type)
+   void checkCompileError(uint32_t obj, Shader::Type type)
    {
       int success;
       char info_log[512];
 
-      glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-      if (!success)
+      switch (type)
       {
-         switch (type)
-         {
-            case Type::kVertex:
-               glGetShaderInfoLog(shader, 512, NULL, info_log);
+         case Type::kVertex:
+            glGetShaderiv(obj, GL_COMPILE_STATUS, &success);
+            if (success != GL_TRUE) {
+               glGetShaderInfoLog(obj, 512, NULL, info_log);
                std::cout << "SHADER::Vertex compilation failed\n" << info_log << std::endl;
-               break;
+            }
+            break;
 
-            case Type::kFragment:
-               glGetShaderInfoLog(shader, 512, NULL, info_log);
+         case Type::kFragment:
+            glGetShaderiv(obj, GL_COMPILE_STATUS, &success);
+            if (success != GL_TRUE) {
+               glGetShaderInfoLog(obj, 512, NULL, info_log);
                std::cout << "SHADER::Fragment compilation failed\n" << info_log << std::endl;
-               break;
+            }
+            break;
 
-            case Type::kProgram:
-               glGetProgramInfoLog(shader, 512, NULL, info_log);
+         case Type::kProgram:
+            glGetProgramiv(obj, GL_COMPILE_STATUS, &success);
+            if (success != GL_TRUE) {
+               glGetProgramInfoLog(obj, 512, NULL, info_log);
                std::cout << "SHADER::Program linking failed\n" << info_log << std::endl;
-               break;
+            }
+            break;
 
-            default:
-               std::cout << "SHADER::Unknown shader compilation error\n";
-         }
+         default:
+            std::cout << "SHADER::Unknown shader compilation error\n";
       }
    }
 };
