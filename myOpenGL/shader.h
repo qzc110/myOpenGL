@@ -49,36 +49,36 @@ public:
       uint32_t vertex = glCreateShader(GL_VERTEX_SHADER);
       glShaderSource(vertex, 1, &vert_shader_code, NULL);
       glCompileShader(vertex);
-      checkCompileError(vertex, Type::kVertex);
+      CheckCompileError(vertex, Type::kVertex);
 
       uint32_t fragment = glCreateShader(GL_FRAGMENT_SHADER);
       glShaderSource(fragment, 1, &frag_shader_code, NULL);
       glCompileShader(fragment);
-      checkCompileError(fragment, Type::kFragment);
+      CheckCompileError(fragment, Type::kFragment);
 
       id_ = glCreateProgram();
       glAttachShader(id_, vertex);
       glAttachShader(id_, fragment);
       glLinkProgram(id_);
-      checkCompileError(id_, Type::kProgram);
+      CheckCompileError(id_, Type::kProgram);
 
       glDeleteShader(vertex);
       glDeleteShader(fragment);
    }
 
-   uint32_t getId() { return id_; }
+   uint32_t GetId() { return id_; }
 
-   void use() { glUseProgram(id_); }
+   void Use() { glUseProgram(id_); }
 
-   void setBool(const std::string& name, bool value) const
+   void SetBool(const std::string& name, bool value) const
    {
       glUniform1i(glGetUniformLocation(id_, name.c_str()), static_cast<int>(value));
    }
-   void setInt(const std::string& name, int value) const
+   void SetInt(const std::string& name, int value) const
    {
       glUniform1i(glGetUniformLocation(id_, name.c_str()), value);
    }
-   void setFloat(const std::string& name, float value) const
+   void SetFloat(const std::string& name, float value) const
    {
       glUniform1f(glGetUniformLocation(id_, name.c_str()), value);
    }
@@ -87,7 +87,7 @@ private:
    enum class Type { kVertex, kFragment, kProgram };
    uint32_t id_;
 
-   void checkCompileError(uint32_t obj, Shader::Type type)
+   void CheckCompileError(uint32_t obj, Shader::Type type)
    {
       int success;
       char info_log[512];
@@ -111,7 +111,7 @@ private:
             break;
 
          case Type::kProgram:
-            glGetProgramiv(obj, GL_COMPILE_STATUS, &success);
+            glGetProgramiv(obj, GL_LINK_STATUS, &success);
             if (success != GL_TRUE) {
                glGetProgramInfoLog(obj, 512, NULL, info_log);
                std::cout << "SHADER::Program linking failed\n" << info_log << std::endl;

@@ -18,10 +18,36 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dynamic.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="dynamic.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="gradient.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="gradient.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="texture.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="texture.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
